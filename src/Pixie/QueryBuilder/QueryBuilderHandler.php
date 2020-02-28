@@ -1,4 +1,6 @@
-<?php namespace Pixie\QueryBuilder;
+<?php 
+
+namespace Pixie\QueryBuilder;
 
 use PDO;
 use Pixie\Connection;
@@ -189,6 +191,7 @@ class QueryBuilderHandler
     /**
      * Get first row
      *
+     * @throws Exception
      * @return \stdClass|null
      * @throws Exception
      */
