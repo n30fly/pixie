@@ -167,7 +167,7 @@ class QueryBuilderHandler
         $eventResult = $this->fireEvents('before-select');
         if (!is_null($eventResult)) {
             return $eventResult;
-        };
+        }
 
         $executionTime = 0;
         if (is_null($this->pdoStatement)) {
@@ -190,6 +190,7 @@ class QueryBuilderHandler
      * Get first row
      *
      * @return \stdClass|null
+     * @throws Exception
      */
     public function first()
     {
@@ -199,10 +200,12 @@ class QueryBuilderHandler
     }
 
     /**
-     * @param        $value
      * @param string $fieldName
      *
+     * @param $value
+     *
      * @return null|\stdClass
+     * @throws Exception
      */
     public function findAll($fieldName, $value)
     {
@@ -215,6 +218,7 @@ class QueryBuilderHandler
      * @param string $fieldName
      *
      * @return null|\stdClass
+     * @throws Exception
      */
     public function find($value, $fieldName = 'id')
     {
@@ -223,18 +227,20 @@ class QueryBuilderHandler
     }
 
     /**
-     * Get count of rows
+     * Get count of rows. Only use with query builder
      *
      * @return int
+     * @throws Exception
      */
     public function count()
     {
+        if (empty($this->statements)) {
+            throw new Exception('Statements is empty. You should use this with table()');
+        }
         // Get the current statements
         $originalStatements = $this->statements;
 
-        unset($this->statements['orderBys']);
-        unset($this->statements['limit']);
-        unset($this->statements['offset']);
+        unset($this->statements['orderBys'], $this->statements['limit'], $this->statements['offset']);
 
         $count = $this->aggregate('count');
         $this->statements = $originalStatements;
@@ -246,6 +252,7 @@ class QueryBuilderHandler
      * @param $type
      *
      * @return int
+     * @throws Exception
      */
     protected function aggregate($type)
     {
@@ -298,12 +305,13 @@ class QueryBuilderHandler
      * @param null $alias
      *
      * @return Raw
+     * @throws Exception
      */
     public function subQuery(QueryBuilderHandler $queryBuilder, $alias = null)
     {
         $sql = '(' . $queryBuilder->getQuery()->getRawSql() . ')';
         if ($alias) {
-            $sql = $sql . ' as ' . $alias;
+            $sql .= ' as ' . $alias;
         }
 
         return $queryBuilder->raw($sql);
@@ -312,7 +320,10 @@ class QueryBuilderHandler
     /**
      * @param $data
      *
+     * @param $type
+     *
      * @return array|string
+     * @throws Exception
      */
     private function doInsert($data, $type)
     {
@@ -354,6 +365,7 @@ class QueryBuilderHandler
      * @param $data
      *
      * @return array|string
+     * @throws Exception
      */
     public function insert($data)
     {
@@ -364,6 +376,7 @@ class QueryBuilderHandler
      * @param $data
      *
      * @return array|string
+     * @throws Exception
      */
     public function insertIgnore($data)
     {
@@ -374,6 +387,7 @@ class QueryBuilderHandler
      * @param $data
      *
      * @return array|string
+     * @throws Exception
      */
     public function replace($data)
     {
@@ -384,6 +398,7 @@ class QueryBuilderHandler
      * @param $data
      *
      * @return $this
+     * @throws Exception
      */
     public function update($data)
     {
@@ -404,14 +419,15 @@ class QueryBuilderHandler
      * @param $data
      *
      * @return array|string
+     * @throws Exception
      */
     public function updateOrInsert($data)
     {
         if ($this->first()) {
             return $this->update($data);
-        } else {
-            return $this->insert($data);
         }
+
+        return $this->insert($data);
     }
 
     /**
@@ -426,7 +442,8 @@ class QueryBuilderHandler
     }
 
     /**
-     *
+     * @return mixed
+     * @throws Exception
      */
     public function delete()
     {
@@ -787,7 +804,7 @@ class QueryBuilderHandler
     public function join($table, $key, $operator = null, $value = null, $type = 'inner')
     {
         if (!$key instanceof \Closure) {
-            $key = function ($joinBuilder) use ($key, $operator, $value) {
+            $key = static function ($joinBuilder) use ($key, $operator, $value) {
                 $joinBuilder->on($key, $operator, $value);
             };
         }
