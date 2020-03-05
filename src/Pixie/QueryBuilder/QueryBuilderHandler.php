@@ -192,7 +192,7 @@ class QueryBuilderHandler
      * Get first row
      *
      * @throws Exception
-     * @return \stdClass|null
+     * @return \stdClass|array|null
      * @throws Exception
      */
     public function first()
