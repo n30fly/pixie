@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace Pixie\QueryBuilder;
 
@@ -190,7 +190,23 @@ class QueryBuilderHandler
         $executionTime += microtime(true) - $start;
         $this->pdoStatement = null;
         $this->fireEvents('after-select', $result, $executionTime);
+
         return $result;
+    }
+
+    /**
+     * @return array
+     * @throws Exception
+     */
+    public function fetchCol() : array
+    {
+        return array_map(static function ($item) {
+            if (\is_object($item)) {
+                $item = (array)$item;
+            }
+
+            return array_pop($item);
+        }, $this->get());
     }
 
     /**
