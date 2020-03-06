@@ -137,6 +137,11 @@ class QueryBuilderHandler
         return $this;
     }
 
+    public function getLastInsertId() : ?int
+    {
+        return $this->pdo->lastInsertId();
+    }
+
     /**
      * @param       $sql
      * @param array $bindings
