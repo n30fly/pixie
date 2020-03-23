@@ -179,4 +179,9 @@ class Connection
     {
         return static::$storedConnection;
     }
+
+    public static function resetStoredConnection() : void
+    {
+        static::$storedConnection = null;
+    }
 }
